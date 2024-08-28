@@ -880,6 +880,7 @@ def course_about(request, course_id):  # pylint: disable=too-many-statements
             'disable_courseware_header': True,
             'pre_requisite_courses': pre_requisite_courses,
             'course_image_urls': overview.image_urls,
+            'organization': Organization.objects.get(short_name=overview.org),
             'sidebar_html_enabled': sidebar_html_enabled,
             'allow_anonymous': allow_anonymous,
         }

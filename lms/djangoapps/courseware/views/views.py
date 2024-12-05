@@ -85,7 +85,8 @@ from lms.djangoapps.courseware.courses import (
     get_permission_for_course_about,
     get_studio_url,
     sort_by_announcement,
-    sort_by_start_date
+    sort_by_start_date,
+    sort_by_start_date_reverse
 )
 from lms.djangoapps.courseware.date_summary import verified_upgrade_deadline_link
 from lms.djangoapps.courseware.exceptions import CourseAccessRedirect, Redirect
@@ -290,6 +291,7 @@ def courses(request):
     Render "find courses" page.  The course selection work is done in courseware.courses.
     """
     courses_list = []
+    top_courses = []
     course_discovery_meanings = getattr(settings, 'COURSE_DISCOVERY_MEANINGS', {})
     set_default_filter = ENABLE_COURSE_DISCOVERY_DEFAULT_LANGUAGE_FILTER.is_enabled()
     if not settings.FEATURES.get('ENABLE_COURSE_DISCOVERY'):
@@ -303,6 +305,8 @@ def courses(request):
             courses_list = sort_by_start_date(courses_list)
         else:
             courses_list = sort_by_announcement(courses_list)
+    
+    top_courses = sort_by_start_date_reverse(courses_list)[:3]
 
     # Add marketable programs to the context.
     programs_list = get_programs_with_type(request.site, include_hidden=False)
@@ -311,6 +315,7 @@ def courses(request):
         "courseware/courses.html",
         {
             'courses': courses_list,
+            'top_courses': top_courses,
             'organizations': Organization.objects.all(),
             'course_discovery_meanings': course_discovery_meanings,
             'set_default_filter': set_default_filter,

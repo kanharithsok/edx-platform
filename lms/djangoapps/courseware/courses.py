@@ -927,7 +927,7 @@ def sort_by_start_date(courses):
 
 def sort_by_start_date_reverse(courses):
     """
-    Returns a list of courses sorted by their start date, latest first.
+    Returns a list of courses sorted by their start date, latest last.
     """
     courses = sorted(
         courses,

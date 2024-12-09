@@ -43,7 +43,7 @@ from common.djangoapps.student.toggles import should_redirect_to_courseware_afte
 from common.djangoapps.track import views as track_views
 from lms.djangoapps.bulk_email.models import Optout
 from common.djangoapps.course_modes.models import CourseMode
-from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
+from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date, sort_by_start_date_reverse
 from common.djangoapps.edxmako.shortcuts import marketing_link, render_to_response, render_to_string  # lint-amnesty, pylint: disable=unused-import
 from common.djangoapps.entitlements.models import CourseEntitlement
 from common.djangoapps.student.helpers import get_next_url_for_login_page, get_redirect_url_with_host
@@ -176,6 +176,9 @@ def index(request, extra_context=None, user=AnonymousUser()):
     context['programs_list'] = get_programs_with_type(request.site, include_hidden=False)
 
     context['organizations'] = Organization.objects.all()
+    
+    context['top_courses'] = sort_by_start_date_reverse(courses)[:3]
+    context['top_courses_list'] = theming_helpers.get_template_path('top_courses_list.html')
     
     return render_to_response('index.html', context)
 

@@ -87,6 +87,7 @@ from common.djangoapps.util.db import outer_atomic
 from common.djangoapps.util.json_request import JsonResponse
 from common.djangoapps.student.signals import USER_EMAIL_CHANGED
 from xmodule.modulestore.django import modulestore  # lint-amnesty, pylint: disable=wrong-import-order
+from organizations.models import Organization
 
 log = logging.getLogger("edx.student")
 
@@ -173,6 +174,8 @@ def index(request, extra_context=None, user=AnonymousUser()):
 
     # Add marketable programs to the context.
     context['programs_list'] = get_programs_with_type(request.site, include_hidden=False)
+
+    context['organizations'] = Organization.objects.all()
 
     return render_to_response('index.html', context)
 

@@ -925,6 +925,17 @@ def sort_by_start_date(courses):
 
     return courses
 
+def sort_by_start_date_reverse(courses):
+    """
+    Returns a list of courses sorted by their start date, latest last.
+    """
+    courses = sorted(
+        courses,
+        key=lambda course: (course.has_ended(), course.start is None, course.start),
+        reverse=True
+    )
+
+    return courses
 
 def get_cms_course_link(course, page='course'):
     """

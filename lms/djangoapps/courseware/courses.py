@@ -925,6 +925,18 @@ def sort_by_start_date(courses):
 
     return courses
 
+def sort_by_enrollment_count(courses):
+    """
+    Returns a list of courses sorted by number of enrollment, latest last.
+    """
+    courses = sorted(
+        courses,
+        key=lambda course: course.get_enrollment_count()['total'],
+        reverse=True
+    )
+
+    return courses
+
 def sort_by_start_date_reverse(courses):
     """
     Returns a list of courses sorted by their start date, latest last.

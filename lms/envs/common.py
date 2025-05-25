@@ -4143,13 +4143,13 @@ COUNTRIES_OVERRIDE = {
 
 # which access.py permission name to check in order to determine if a course is visible in
 # the course catalog. We default this to the legacy permission 'see_exists'.
-COURSE_CATALOG_VISIBILITY_PERMISSION = 'see_in_catalog'
+COURSE_CATALOG_VISIBILITY_PERMISSION = 'see_exists'
 
 # which access.py permission name to check in order to determine if a course about page is
 # visible. We default this to the legacy permission 'see_exists'.
-COURSE_ABOUT_VISIBILITY_PERMISSION = 'see_about_page'
+COURSE_ABOUT_VISIBILITY_PERMISSION = 'see_exists'
 
-DEFAULT_COURSE_VISIBILITY_IN_CATALOG = "both"
+DEFAULT_COURSE_VISIBILITY_IN_CATALOG = "about"
 
 # .. toggle_name: DEFAULT_MOBILE_AVAILABLE
 # .. toggle_implementation: DjangoSetting

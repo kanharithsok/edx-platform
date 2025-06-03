@@ -144,6 +144,14 @@ def index(request, extra_context=None, user=AnonymousUser()):
     else:
         courses = sort_by_announcement(courses)
 
+    if request.user.is_authenticated:
+        if request.user.email.lower().split('@')[-1] != 'yopmail.com': # change from yopmail to cbc domain
+            filtered_courses = [course for course in courses if course.org != 'CBC-Internal']
+            courses = filtered_courses
+    else:
+        filtered_courses = [course for course in courses if course.org != 'CBC-Internal']
+        courses = filtered_courses
+
     context = {'courses': courses}
 
     context['homepage_overlay_html'] = configuration_helpers.get_value('homepage_overlay_html')

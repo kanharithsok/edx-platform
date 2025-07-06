@@ -145,7 +145,7 @@ def index(request, extra_context=None, user=AnonymousUser()):
         courses = sort_by_announcement(courses)
 
     if request.user.is_authenticated:
-        if request.user.email.lower().split('@')[-1] != 'yopmail.com': # change from yopmail to cbc domain
+        if request.user.email.lower().split('@')[-1] != 'creditbureau.com.kh': # change from yopmail to cbc domain
             filtered_courses = [course for course in courses if course.org != 'CBC-Internal']
             courses = filtered_courses
     else:

@@ -310,6 +310,7 @@ def courses(request):
     return render_to_response(
         "courseware/courses.html",
         {
+            'user': request.user,
             'courses': courses_list,
             'organizations': Organization.objects.all(),
             'course_discovery_meanings': course_discovery_meanings,

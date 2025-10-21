@@ -3794,13 +3794,40 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "common.djangoapps.util.password_policy_validators.MinimumLengthValidator",
         "OPTIONS": {
-            "min_length": 8
+            "min_length": 8,
         }
     },
     {
         "NAME": "common.djangoapps.util.password_policy_validators.MaximumLengthValidator",
         "OPTIONS": {
-            "max_length": 75
+            "max_length": 16,
+        }
+    },
+    {
+        "NAME": "common.djangoapps.util.password_policy_validators.UppercaseValidator",
+        "OPTIONS": {
+            "min_upper": 1,
+        }
+    },
+    {
+        "NAME": "common.djangoapps.util.password_policy_validators.LowercaseValidator",
+        "OPTIONS": {
+            "min_lower": 1,
+
+        }
+    },
+    {
+        "NAME": "common.djangoapps.util.password_policy_validators.NumericValidator",
+        "OPTIONS": {
+            "min_numeric": 1,
+
+        }
+    },
+    {
+        "NAME": "common.djangoapps.util.password_policy_validators.SymbolValidator",
+        "OPTIONS": {
+            "min_symbol": 1,
+
         }
     },
 ]

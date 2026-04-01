@@ -144,13 +144,12 @@ def index(request, extra_context=None, user=AnonymousUser()):
     else:
         courses = sort_by_announcement(courses)
 
-    if request.user.is_authenticated:
-        if request.user.email.lower().split('@')[-1] != 'creditbureau.com.kh': # change from yopmail to cbc domain
-            filtered_courses = [course for course in courses if course.org != 'CBC-Internal' or course.org.lower() != 'internal']
-            courses = filtered_courses
-    else:
-        filtered_courses = [course for course in courses if course.org != 'CBC-Internal' or course.org.lower() != 'internal']
-        courses = filtered_courses
+    cbc_domain = 'creditbureau.com.kh'
+    user_domain = request.user.email.lower().split('@')[-1] if request.user.is_authenticated else None
+    
+    # Filter out internal courses unless user is from CBC domain
+    if user_domain != cbc_domain:
+        courses = [course for course in courses if course.org != 'CBC-Internal' and course.org.lower() != 'internal']
 
     context = {'courses': courses}
 

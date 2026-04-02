@@ -437,47 +437,57 @@ class PunctuationValidator:
 
 class SymbolValidator:
     """
-    Validate whether the password contains at least min_symbol symbols as defined by unicode categories.
-
-    Parameters:
-        min_symbol (int): the minimum number of symbols to require
-            in the password. Must be >= 0.
+    Validate whether the password contains at least min_symbol symbols.
+    By default, symbols are defined by an explicit allowed set (common punctuation).
+    You can configure the validator in AUTH_PASSWORD_VALIDATORS with an
+    "allowed_symbols" option (string of characters).
     """
-    def __init__(self, min_symbol=0):
+    DEFAULT_ALLOWED_SYMBOLS = r"""!@#$%^&*()_+-=[]{}|;:'",.<>/?`~"""
+
+    def __init__(self, min_symbol=0, allowed_symbols=None):
         self.min_symbol = min_symbol
+        # allow passing either a string or None; fallback to default set
+        self.allowed_symbols = allowed_symbols if allowed_symbols is not None else self.DEFAULT_ALLOWED_SYMBOLS
+        # For display, keep a short sample or full list
+        self.allowed_symbols_display = self.allowed_symbols
 
     def validate(self, password, user=None):  # lint-amnesty, pylint: disable=unused-argument
-        if _validate_condition(password, lambda c: 'S' in unicodedata.category(c), self.min_symbol):
+        # count characters that are in the allowed_symbols set
+        count = sum(1 for c in password if c in self.allowed_symbols)
+        if count >= self.min_symbol:
             return
+        # Do NOT format the message here; pass params to ValidationError for safe translation/formatting
         raise ValidationError(
             ngettext(
-                'This password must contain at least %(min_symbol)d symbol.',
-                'This password must contain at least %(min_symbol)d symbols.',
+                'This password must contain at least %(min_symbol)d symbol (e.g. %(symbols)s).',
+                'This password must contain at least %(min_symbol)d symbols (e.g. %(symbols)s).',
                 self.min_symbol
             ),
             code='too_few_symbols',
-            params={'min_symbol': self.min_symbol},
+            params={'min_symbol': self.min_symbol, 'symbols': self.allowed_symbols_display},
         )
 
     def get_help_text(self):
+        # format here for immediate help text display
         return ngettext(
-            "Your password must contain at least %(min_symbol)d symbol.",
-            "Your password must contain at least %(min_symbol)d symbols.",
+            'Your password must contain at least %(min_symbol)d symbol (e.g. %(symbols)s).',
+            'Your password must contain at least %(min_symbol)d symbols (e.g. %(symbols)s).',
             self.min_symbol
-        ) % {'min_symbol': self.min_symbol}
+        ) % {'min_symbol': self.min_symbol, 'symbols': self.allowed_symbols_display}
 
     def get_instruction_text(self):  # lint-amnesty, pylint: disable=missing-function-docstring
         if self.min_symbol > 0:
             return ngettext(
-                '%(num)d symbol',
-                '%(num)d symbols',
+                '%(num)d symbol (e.g. %(symbols)s)',
+                '%(num)d symbols (e.g. %(symbols)s)',
                 self.min_symbol
-            ) % {'num': self.min_symbol}
+            ) % {'num': self.min_symbol, 'symbols': self.allowed_symbols_display}
         else:
             return ''
 
     def get_restriction(self):
         """
-        Returns a key, value pair for the restrictions related to the Validator
+        Returns a key, value pair for the restrictions related to the Validator.
+        Note: only exposes numeric restriction; allowed_symbols could be exposed if needed.
         """
         return 'min_symbol', self.min_symbol

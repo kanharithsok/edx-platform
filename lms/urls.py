@@ -1053,3 +1053,9 @@ urlpatterns += [
 urlpatterns += [
     path('api/notifications/', include('openedx.core.djangoapps.notifications.urls')),
 ]
+
+from lms.djangoapps.contact.views.contact_api import contact_submit
+
+urlpatterns += [
+    path("contact/submit/", contact_submit, name="contact_submit"),
+]

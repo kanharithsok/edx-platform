@@ -153,6 +153,10 @@ class CourseOverview(TimeStampedModel):
 
     history = HistoricalRecords()
 
+    def get_enrollment_count(self):
+        from common.djangoapps.student.models import CourseEnrollment
+        return CourseEnrollment.objects.enrollment_counts(self.id)
+
     @classmethod
     def _create_or_update(cls, course):  # lint-amnesty, pylint: disable=too-many-statements
         """

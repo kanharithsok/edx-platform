@@ -43,7 +43,7 @@ from common.djangoapps.student.toggles import should_redirect_to_courseware_afte
 from common.djangoapps.track import views as track_views
 from lms.djangoapps.bulk_email.models import Optout
 from common.djangoapps.course_modes.models import CourseMode
-from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date, sort_by_start_date_reverse
+from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date, sort_by_start_date_reverse, sort_by_enrollment_count
 from common.djangoapps.edxmako.shortcuts import marketing_link, render_to_response, render_to_string  # lint-amnesty, pylint: disable=unused-import
 from common.djangoapps.entitlements.models import CourseEntitlement
 from common.djangoapps.student.helpers import get_next_url_for_login_page, get_redirect_url_with_host
@@ -144,6 +144,13 @@ def index(request, extra_context=None, user=AnonymousUser()):
     else:
         courses = sort_by_announcement(courses)
 
+    cbc_domain = 'creditbureau.com.kh'
+    user_domain = request.user.email.lower().split('@')[-1] if request.user.is_authenticated else None
+    
+    # Filter out internal courses unless user is from CBC domain
+    if user_domain != cbc_domain:
+        courses = [course for course in courses if course.org != 'CBC-Internal' and course.org.lower() != 'internal']
+
     context = {'courses': courses}
 
     context['homepage_overlay_html'] = configuration_helpers.get_value('homepage_overlay_html')
@@ -176,6 +183,12 @@ def index(request, extra_context=None, user=AnonymousUser()):
     context['programs_list'] = get_programs_with_type(request.site, include_hidden=False)
 
     context['organizations'] = Organization.objects.all()
+
+    context['popular_courses'] = sort_by_enrollment_count(courses)[:3]
+    context['popular_courses_list'] = theming_helpers.get_template_path('popular_courses_list.html')
+    
+    context['top_courses'] = sort_by_start_date_reverse(courses)[:3]
+    context['top_courses_list'] = theming_helpers.get_template_path('top_courses_list.html')
     
     context['top_courses'] = sort_by_start_date_reverse(courses)[:3]
     context['top_courses_list'] = theming_helpers.get_template_path('top_courses_list.html')

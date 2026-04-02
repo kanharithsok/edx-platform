@@ -3,12 +3,13 @@ Common utility functions useful throughout the contentstore
 """
 from __future__ import annotations
 import configparser
+import html
 import logging
 import re
 from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlencode, urlunparse, urlparse
 from uuid import uuid4
 
 from bs4 import BeautifulSoup
@@ -192,31 +193,30 @@ def get_lms_link_for_item(location, preview=False):
     """
     assert isinstance(location, UsageKey)
 
-    # checks LMS_BASE value in site configuration for the given course_org_filter(org)
-    # if not found returns settings.LMS_BASE
+    # checks LMS_ROOT_URL value in site configuration for the given course_org_filter(org)
+    # if not found returns settings.LMS_ROOT_URL
     lms_base = SiteConfiguration.get_value_for_org(
         location.org,
-        "LMS_BASE",
-        settings.LMS_BASE
+        "LMS_ROOT_URL",
+        settings.LMS_ROOT_URL
     )
+    query_string = ''
 
     if lms_base is None:
         return None
 
     if preview:
-        # checks PREVIEW_LMS_BASE value in site configuration for the given course_org_filter(org)
-        # if not found returns settings.FEATURES.get('PREVIEW_LMS_BASE')
-        lms_base = SiteConfiguration.get_value_for_org(
-            location.org,
-            "PREVIEW_LMS_BASE",
-            settings.FEATURES.get('PREVIEW_LMS_BASE')
-        )
+        params = {'preview': '1'}
+        query_string = urlencode(params)
 
-    return "//{lms_base}/courses/{course_key}/jump_to/{location}".format(
-        lms_base=lms_base,
+    url_parts = list(urlparse(lms_base))
+    url_parts[2] = '/courses/{course_key}/jump_to/{location}'.format(
         course_key=str(location.course_key),
         location=str(location),
     )
+    url_parts[4] = query_string
+
+    return urlunparse(url_parts)
 
 
 def get_lms_link_for_certificate_web_view(course_key, mode):
@@ -1552,6 +1552,9 @@ def get_library_context(request, request_is_json=False):
     from cms.djangoapps.contentstore.views.library import (
         user_can_view_create_library_button,
     )
+    from openedx.core.djangoapps.content_libraries.api import (
+        user_can_create_library,
+    )
 
     libraries = _accessible_libraries_iter(request.user) if libraries_v1_enabled() else []
     data = {
@@ -1565,6 +1568,7 @@ def get_library_context(request, request_is_json=False):
             'courses': [],
             'libraries_enabled': libraries_v1_enabled(),
             'show_new_library_button': user_can_view_create_library_button(request.user) and request.user.is_active,
+            'show_new_library_v2_button': user_can_create_library(request.user),
             'user': request.user,
             'request_course_creator_url': reverse('request_course_creator'),
             'course_creator_status': _get_course_creator_status(request.user),
@@ -1686,6 +1690,9 @@ def get_home_context(request, no_course=False):
     from cms.djangoapps.contentstore.views.library import (
         user_can_view_create_library_button,
     )
+    from openedx.core.djangoapps.content_libraries.api import (
+        user_can_create_library,
+    )
 
     active_courses = []
     archived_courses = []
@@ -1714,6 +1721,7 @@ def get_home_context(request, no_course=False):
         'taxonomy_list_mfe_url': get_taxonomy_list_url(),
         'libraries': libraries,
         'show_new_library_button': user_can_view_create_library_button(user),
+        'show_new_library_v2_button': user_can_create_library(user),
         'user': user,
         'request_course_creator_url': reverse('request_course_creator'),
         'course_creator_status': _get_course_creator_status(user),
@@ -2258,6 +2266,7 @@ def clean_html_body(html_body):
     """
     Get html body, remove tags and limit to 500 characters
     """
+    html_body = html.unescape(html_body).strip()
     html_body = BeautifulSoup(Truncator(html_body).chars(500, html=True), 'html.parser')
     text_content = html_body.get_text(separator=" ").strip()
     text_content = text_content.replace('\n', '').replace('\r', '')

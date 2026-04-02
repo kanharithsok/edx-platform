@@ -190,6 +190,9 @@ def index(request, extra_context=None, user=AnonymousUser()):
     context['top_courses'] = sort_by_start_date_reverse(courses)[:3]
     context['top_courses_list'] = theming_helpers.get_template_path('top_courses_list.html')
     
+    context['top_courses'] = sort_by_start_date_reverse(courses)[:3]
+    context['top_courses_list'] = theming_helpers.get_template_path('top_courses_list.html')
+    
     return render_to_response('index.html', context)
 
 
